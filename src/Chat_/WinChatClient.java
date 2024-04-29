@@ -76,10 +76,6 @@ public class WinChatClient extends Frame implements ActionListener {
     }
 
     public static void main(String[] args) {
-//        if (args.length != 1) {
-//            System.out.println("사용법: java WinChatClient ip");
-//            System.exit(1);
-//        }
         new WinChatClient("127.0.0.1");
     }
 

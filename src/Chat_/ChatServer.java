@@ -11,17 +11,12 @@ import java.util.*;
 
 public class ChatServer {
     public static void main(String[] args) {
-        //1. 서버소켓을 생성!!
         try (ServerSocket serverSocket = new ServerSocket(12344);) {
             System.out.println("서버가 준비되었습니다.");
-            //여러명의 클라이언트의 정보를 기억할 공간
             Map<String, PrintWriter> chatClients = new HashMap<>();
 
             while (true) {
-                //2. accept() 를 통해서 소켓을 얻어옴.   (여러명의 클라이언트와 접속할 수 있도록 구현)
                 Socket socket = serverSocket.accept();
-                //Thread 이용!!
-                //여러명의 클라이언트의 정보를 기억할 공간
                 new ChatThread(socket, chatClients).start();
 
             }
@@ -47,20 +42,15 @@ class ChatThread extends Thread {
         this.socket = socket;
         this.chatClients = chatClients;
 
-        //클라이언트가 생성될 때 클라이언트로 부터 아이디를 얻어오게 하고 싶어요.
-        //각각 클라이언트와 통신 할 수 있는 통로얻어옴.
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            //Client가 접속하자마 id를 보낸다는 약속!!
             id = in.readLine();
-            //이때..  모든 사용자에게 id님이 입장했다라는 정보를 알려줌.
             broadcast(id + "님이 입장하셨습니다.");
             System.out.println("새로운 사용자의 아이디는 " + id + "입니다.");
             InetAddress clientAddress = socket.getInetAddress();
             System.out.println("새로운 연결: " + clientAddress.getHostAddress());
 
-            //동시에 일어날 수도..
             synchronized (chatClients) {
                 chatClients.put(this.id, out);
             }
@@ -84,8 +74,6 @@ class ChatThread extends Thread {
     @Override
     public void run() {
         System.out.println(id + "사용자 채팅시작!!");
-        //run
-        //연결된 클라이언트가 메시지를 전송하면, 그 메시지를 받아서 다른 사용자들에게 보내줌..
         String msg = null;
         try {
             while ((msg = in.readLine()) != null) {
@@ -173,7 +161,7 @@ class ChatThread extends Thread {
                 rooms.remove(currentRoom);
                 out.println("방 번호 " + currentRoom + "가 삭제되었습니다.");
             }
-            currentRoom = null; // 로비로 이동
+            currentRoom = null;
             out.println("방을 나갔습니다.");
         }
     }
@@ -200,18 +188,16 @@ class ChatThread extends Thread {
         }
     }
 
-    //메시지를 특정 사용자에게만 보내는 메서드
     public void sendMsg(String msg) {
         int firstSpaceIndex = msg.indexOf(" ");
-        if (firstSpaceIndex == -1) return; //공백이 없다면....
+        if (firstSpaceIndex == -1) return;
 
         int secondSpaceIndex = msg.indexOf(" ", firstSpaceIndex + 1);
-        if (secondSpaceIndex == -1) return; //두번재 공백이 없다는 것도 메시지가 잘못된거니까..
+        if (secondSpaceIndex == -1) return;
 
         String to = msg.substring(firstSpaceIndex + 1, secondSpaceIndex);
         String message = msg.substring(secondSpaceIndex + 1);
 
-        //to(수신자)에게 메시지 전송.
         PrintWriter pw = chatClients.get(to);
         if (pw != null) {
             pw.println(id + "님으로부터 온 비밀 메시지 : " + message);
@@ -244,7 +230,6 @@ class ChatThread extends Thread {
     }
 
 
-    //메지시를 전체 사용자에게 보내는 메서드
     public void broadcast(String msg) {
         synchronized (chatClients) {
             Iterator<PrintWriter> it = chatClients.values().iterator();
@@ -253,7 +238,7 @@ class ChatThread extends Thread {
                 try {
                     out.println(msg);
                 } catch (Exception e) {
-                    it.remove();  //브로드케스트 할 수 없는 사용자를 제거한다.
+                    it.remove();
                     e.printStackTrace();
                 }
             }
