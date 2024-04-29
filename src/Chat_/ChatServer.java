@@ -58,7 +58,6 @@ class ChatThread extends Thread {
             broadcast(id + "님이 입장하셨습니다.");
             System.out.println("새로운 사용자의 아이디는 " + id + "입니다.");
             InetAddress clientAddress = socket.getInetAddress();
-            broadcast("새로운 연결: " + clientAddress.getHostAddress());
             System.out.println("새로운 연결: " + clientAddress.getHostAddress());
 
             //동시에 일어날 수도..
