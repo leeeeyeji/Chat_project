@@ -11,7 +11,7 @@ import java.util.*;
 
 public class ChatServer {
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(12344);) {
+        try (ServerSocket serverSocket = new ServerSocket(12345);) {
             System.out.println("서버가 준비되었습니다.");
             Map<String, PrintWriter> chatClients = new HashMap<>();
 
